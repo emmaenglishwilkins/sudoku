@@ -1,4 +1,5 @@
 import random
+import copy
 
 class Board: 
     def __init__(self): 
@@ -50,26 +51,41 @@ class Board:
 
     def remove_tiles(self, difficulty=30):
         tile_removed = 0 
-        while tile_removed < difficulty:
+        attempts = 0 
+        while tile_removed < difficulty and attempts < 100:
             row, col = random.randint(0,8), random.randint(0,8)
             if self.board[row][col] != 0:
-                self.board[row][col] = 0 
-                tile_removed += 1
+                backup = self.board[row][col]
+                self.board[row][col] = 0
 
-    def solve(self):
+                if self.count_solutions() == 1:
+                    tile_removed +=1
+                else: 
+                    self.board[row][col] = backup
+                attempts += 1
+
+                
+
+    def solve(self, count=False):
         empty = self.find_empty()
 
         if not empty:
-            return True
+            return 1 if count else True
         
         row, col = empty
+        solutions = 0
         for num in range(1, 10):
             if self.valid(row, col, num):
                 self.board[row][col] = num
-                if self.solve():
-                    return True
+                if count: 
+                    solutions += self.solve(count=True)
+                    if solutions > 1: 
+                        break
+                else: 
+                    if self.solve():
+                        return True
                 self.board[row][col] = 0
-        return False
+        return solutions if count else False
 
 
     def find_empty(self):
@@ -83,7 +99,15 @@ class Board:
         for row in self.board:
             print(row)
 
+    def count_solutions(self):
+        # Make a deep copy of the board to avoid modifying the original
+        board_copy = copy.deepcopy(self.board)
+        solvable = self.solve(count=True)
+        # Restore the original board
+        self.board = board_copy
+        return solvable
+
 # Generate a Sudoku board
-sudoku_board = Board()
-sudoku_board.generate_board()
-sudoku_board.print_board()
+# sudoku_board = Board()
+# sudoku_board.generate_board()
+# sudoku_board.print_board()

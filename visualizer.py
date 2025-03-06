@@ -35,7 +35,7 @@ def draw_board(board):
 
 board = Board()
 board.generate_board()
-board.remove_tiles(50)
+board.remove_tiles(80)
 
 
 # if board.solve():
