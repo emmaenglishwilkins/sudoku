@@ -1,5 +1,6 @@
 import pygame
 from soduku import Board
+import keyboard 
 
 pygame.init()
 
@@ -11,7 +12,7 @@ cell_size = width / 9
 WHITE = (255,255,255)
 BLACK = (0,0,0)
 GRAY = (200, 200, 200)
-BLUE = (48,197,255, 128)
+BLUE = (48,197,255, 70)
 
 font = pygame.font.SysFont('arial', 40)
 
@@ -44,7 +45,11 @@ def draw_board(board):
 
 board = Board()
 board.generate_board()
-board.remove_tiles(80)
+board.remove_tiles()
+
+original = board
+
+
 
 
 # if board.solve():
@@ -54,6 +59,7 @@ board.remove_tiles(80)
 
 selected_cell = None
 running = True
+editable = False
 
 while running: 
     for event in pygame.event.get():
@@ -65,12 +71,18 @@ while running:
             x, y = pygame.mouse.get_pos()
             row = int(y // cell_size)
             col = int(x // cell_size)
-            # check if valid
-            selected_cell = (row, col)
+            if original.board[row][col] == 0: 
+                selected_cell = (row, col)
+                editable = True
         # typing number
         elif event.type == pygame.KEYDOWN:
-            if selected_cell: 
-                pass
+            if editable:
+                if keyboard.is_pressed('backspace'):
+                    board.board[row][col] = 0
+                for i in range(1,10):
+                    if keyboard.is_pressed(str(i)):
+                        board.board[row][col] = i
+
 
 
     draw_board(board.board)
