@@ -1,6 +1,7 @@
 import pygame
 from soduku import Board
 import keyboard 
+import copy 
 
 pygame.init()
 
@@ -13,13 +14,17 @@ WHITE = (255,255,255)
 BLACK = (0,0,0)
 GRAY = (200, 200, 200)
 BLUE = (48,197,255, 70)
+GREEN = (0, 255, 0)
 
 font = pygame.font.SysFont('arial', 40)
 
 screen = pygame.display.set_mode((width, height))
 
-def draw_board(board): 
-    screen.fill(WHITE)
+def draw_board(board, is_solved): 
+    if is_solved: 
+        screen.fill(GREEN)
+    else:
+        screen.fill(WHITE)
     for i in range(9):
         for j in range(9):
             if board[i][j] != 0:
@@ -42,24 +47,21 @@ def draw_board(board):
         screen.blit(transparent_surface, (selected_cell[1] * cell_size, selected_cell[0] * cell_size))
         #pygame.draw.rect(screen, BLUE, (selected_cell[1] * cell_size, selected_cell[0] * cell_size, cell_size, cell_size), 5)
 
-
 board = Board()
 board.generate_board()
-board.remove_tiles()
 
-original = board
+solution = copy.deepcopy(board)
 
+board.remove_tiles(5)
 
-
-
-# if board.solve():
-#     print("solvable")
-# else:
-#     print("too many removed")
+original = copy.deepcopy(board)
 
 selected_cell = None
 running = True
 editable = False
+
+def check_is_solved(board, solution):
+    return board == solution
 
 while running: 
     for event in pygame.event.get():
@@ -71,9 +73,14 @@ while running:
             x, y = pygame.mouse.get_pos()
             row = int(y // cell_size)
             col = int(x // cell_size)
+            selected_cell = (row, col)
             if original.board[row][col] == 0: 
-                selected_cell = (row, col)
+                # selected_cell = (row, col)
+                print("this cell is editable")
                 editable = True
+            else: 
+                print("this cell is NOT editable")
+                editable = False
         # typing number
         elif event.type == pygame.KEYDOWN:
             if editable:
@@ -82,10 +89,11 @@ while running:
                 for i in range(1,10):
                     if keyboard.is_pressed(str(i)):
                         board.board[row][col] = i
+                editable = True
 
+    is_solved = check_is_solved(board.board, solution.board)
 
-
-    draw_board(board.board)
+    draw_board(board.board, is_solved)
     pygame.display.flip()
 
 pygame.quit()
